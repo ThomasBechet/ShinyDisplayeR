@@ -3,36 +3,52 @@ library(FactoMineR)
 library(factoextra)
 
 function(input, output, session) {
-  output$table <- renderTable({
+  # Load table data
+  table <- reactive({
     file <- input$csvFile
     ext <- tools::file_ext(file$datapath)
 
     req(file)
     validate(need(ext == "csv", "Please upload a csv file"))
 
-    read.csv(file$datapath, header = input$header)
+    read.table(file$datapath, header=input$header, sep=',')
   })
 
-  output$image <- renderImage({
-    file <- input$csvFile
-    ext <- tools::file_ext(file$datapath)
+  pca <- reactive({
+    PCA(table()[,2:10], scale.unit=TRUE, ncp=5, graph=F)
+  })
+  ca <- reactive({
+    CA(table()[,2:10], graph=F)
+  })
+  hcpc <- reactive({
+    res.mfa = MFA(table()[,2:10], graph=F)
+    HCPC(res.mfa)
+  })
 
-    req(file)
-    validate(need(ext == "csv", "Please upload a csv file"))
+  # Displayed table 
+  output$table <- renderTable({
+    table()
+  })
 
-    tab <- read.table(file$datapath, header=TRUE, sep=',')
-    res.pca = PCA(tab[,2:10], scale.unit=TRUE, ncp=5, graph=F)
-
-    size = session$clientData$output_image_width / 2
-    filename = "output.jpg"
-    jpeg(filename, width=size, height=size)
-    if (input$graph == TRUE) {
-      print(fviz_pca_var(res.pca))
-    } else {
-      print(fviz_pca_ind(res.pca))
+  # Plot0
+  output$plot0 <- renderPlot({
+    if (input$method == "ACP") {
+      plot.PCA(pca(), choix="ind")
+    } else if (input$method == "AFC") {
+      plot.CA(ca())
+    } else if (input$method == "CAH") {
+      plot.HCPC(hcpc())
     }
-    dev.off()
+  })
 
-    list(src = filename)
-  }, deleteFile=TRUE)
+  # Plot1
+  output$plot1 <- renderPlot({
+    if (input$method == "ACP") {
+      plot.PCA(pca(), choix="var")
+    } else if (input$method == "AFC") {
+      # plot.CA(ca())
+    } else if (input$method == "CAH") {
+      # plot.HCPC(hcpc())
+    }
+  })
 }
