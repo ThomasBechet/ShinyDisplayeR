@@ -5,18 +5,23 @@ fluidPage(
     sidebarPanel(
       fileInput("csvFile", "Choose a CSV File", accept = ".csv"),
       selectInput("method", "Méthode:", 
-        choices=list("ACP", "AFC", "CAH", "k-means")),
+        choices=list("ACP", "CAH")),
       checkboxInput("header", "Header", TRUE),
-      checkboxInput("graph", "Graph", TRUE),
+      #checkboxGroupInput(inputId="columns", label="Colonnes sélectionnées", choices=uiOutput("columns_list")),
+      uiOutput("checkboxes"),
       width=2
     ),
     mainPanel(
       tabsetPanel(type = "tabs",
-        tabPanel("Plot", splitLayout( 
-          plotOutput("plot0"),
-          plotOutput("plot1")
-        )),
-        tabPanel("Summary", tableOutput("table"))
+        tabPanel(title=uiOutput("plot0_name"), 
+          plotOutput("plot0", height="600px")
+        ),
+        tabPanel(title=uiOutput("plot1_name"),
+          plotOutput("plot1", height = "600px")
+        ),
+        tabPanel("Summary",
+          tableOutput("table")
+        )
       )
     )
   )

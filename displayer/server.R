@@ -1,6 +1,7 @@
 library(shiny)
 library(FactoMineR)
 library(factoextra)
+data(tea)
 
 function(input, output, session) {
   # Load table data
@@ -17,12 +18,14 @@ function(input, output, session) {
   pca <- reactive({
     PCA(table()[,2:10], scale.unit=TRUE, ncp=5, graph=F)
   })
-  ca <- reactive({
-    CA(table()[,2:10], graph=F)
-  })
   hcpc <- reactive({
-    res.mfa = MFA(table()[,2:10], graph=F)
-    HCPC(res.mfa)
+    HCPC(pca(), nb.clust=-1 , order=TRUE, graph=F)
+  })
+
+  # Select columns
+  output$checkboxes <- renderUI({
+    tab = table()
+    checkboxGroupInput("checkboxes", "Selected columns", choices=tab[1,2:length(tab[0,])])
   })
 
   # Displayed table 
@@ -34,10 +37,17 @@ function(input, output, session) {
   output$plot0 <- renderPlot({
     if (input$method == "ACP") {
       plot.PCA(pca(), choix="ind")
-    } else if (input$method == "AFC") {
-      plot.CA(ca())
     } else if (input$method == "CAH") {
-      plot.HCPC(hcpc())
+      plot.HCPC(hcpc(), choice="tree")
+    }
+  })
+
+  # Plot 0 title
+  output$plot0_name <- renderText({
+    if (input$method == "ACP") {
+      "Individus"
+    } else if (input$method == "CAH") {
+      "Arbre hiéarchique"
     }
   })
 
@@ -45,10 +55,17 @@ function(input, output, session) {
   output$plot1 <- renderPlot({
     if (input$method == "ACP") {
       plot.PCA(pca(), choix="var")
-    } else if (input$method == "AFC") {
-      # plot.CA(ca())
     } else if (input$method == "CAH") {
-      # plot.HCPC(hcpc())
+      plot.HCPC(hcpc(), choice="map")
+    }
+  })
+
+  # Plot 1 title
+  output$plot1_name <- renderText({
+    if (input$method == "ACP") {
+      "Variables"
+    } else if (input$method == "CAH") {
+      "Carte des facteurs"
     }
   })
 }
