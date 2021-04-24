@@ -8,7 +8,7 @@ fluidPage(
         choices=list("ACP", "CAH")),
       checkboxInput("header", "Header", TRUE),
       #checkboxGroupInput(inputId="columns", label="Colonnes sélectionnées", choices=uiOutput("columns_list")),
-      uiOutput("checkboxes"),
+      uiOutput("sel_vars"),
       width=2
     ),
     mainPanel(
