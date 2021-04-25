@@ -1,26 +1,36 @@
 library(shiny)
 
 fluidPage(
+  # Sidebar + Main Panel layout
   sidebarLayout(
+    # Side panel
     sidebarPanel(
-      fileInput("csvFile", "Choose a CSV File", accept = ".csv"),
+      # File selection
+      fileInput("csvFile", "Choix du fichier CSV", accept = ".csv"),
+      # Select with or without header
+      checkboxInput("header", "Fichier avec en-tête ?", TRUE),
+      # Method selection
       selectInput("method", "Méthode:", 
         choices=list("ACP", "CAH")),
-      checkboxInput("header", "Header", TRUE),
-      #checkboxGroupInput(inputId="columns", label="Colonnes sélectionnées", choices=uiOutput("columns_list")),
+      # Column selection
       uiOutput("sel_vars"),
       width=2
     ),
+    # Main panel
     mainPanel(
+      # Tab layout
       tabsetPanel(type = "tabs",
+        # Data tab
+        tabPanel("Données",
+          tableOutput("table")
+        ),
+        # First plot tab
         tabPanel(title=uiOutput("plot0_name"), 
           plotOutput("plot0", height="600px")
         ),
+        # First plot tab
         tabPanel(title=uiOutput("plot1_name"),
           plotOutput("plot1", height = "600px")
-        ),
-        tabPanel("Summary",
-          tableOutput("table")
         )
       )
     )
