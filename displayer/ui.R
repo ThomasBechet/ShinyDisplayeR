@@ -14,6 +14,8 @@ fluidPage(
         choices=list("ACP", "CAH")),
       # Column selection
       uiOutput("sel_vars"),
+      uiOutput("quanti_sup"),
+      uiOutput("quali_sup"),
       width=2
     ),
     # Main panel

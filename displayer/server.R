@@ -24,6 +24,8 @@ function(input, output, session) {
   pca <- reactive({
     # Get selected columns
     listIndexes <- c()
+	quantiSupIndexes <- c()
+	qualiSupIndexes <- c()
     dat <- table()
     for(i in 1:length(input$sel_vars)) {
       for(j in 1:length(colnames(dat))) {
@@ -33,10 +35,33 @@ function(input, output, session) {
           }
         }
       }
+	}
+    
+    for(i in 1:length(input$quanti_sup)) {
+      for(j in 1:length(colnames(dat))) {
+        if (!is.null(colnames(dat)[j]) & !is.null(input$quanti_sup[i])) {
+          if (colnames(dat)[j] == input$quanti_sup[i]) {
+            listIndexes <- append(listIndexes, j)
+			quantiSupIndexes <- append(quantiSupIndexes, length(listIndexes))
+          }
+        }
+      }
+    }
+    
+    for(i in 1:length(input$quali_sup)) {
+      for(j in 1:length(colnames(dat))) {
+        if (!is.null(colnames(dat)[j]) & !is.null(input$quali_sup[i])) {
+          if (colnames(dat)[j] == input$quali_sup[i]) {
+            listIndexes <- append(listIndexes, j)
+			qualiSupIndexes <- append(qualiSupIndexes, length(listIndexes))
+          }
+        }
+      }
     }
 
+#PCA(decathlon, scale.unit=TRUE, ncp=5, quanti.sup=c(11: 12), quali.sup=13, graph=T)
     # Compute the PCA from selected columns
-    PCA(dat[,listIndexes], scale.unit=TRUE, ncp=5, graph=F)
+    PCA(dat[,listIndexes], scale.unit=TRUE, ncp=5, graph=F, quanti.sup=quantiSupIndexes, quali.sup=qualiSupIndexes)
   })
 
   # Compute the hierarchical ascendant clustering
@@ -63,6 +88,48 @@ function(input, output, session) {
 	  selectizeInput(
 		  "sel_vars",
 		  "Colonnes sélectionnées :",
+		  choices = colnames(dat),
+		  multiple = TRUE,
+		  selected = selected
+		)
+  })
+  
+  # Select columns quanti sup
+  output$quanti_sup <- renderUI({
+    selected <- c()
+    dat <- table()
+    for(colname in colnames(dat)) {
+      # Remove useless column by default (better alternative ?)
+      if (colname == 'Rank' | colname == 'Points') {
+        selected <- append(selected, colname)
+      }
+    }
+  
+    # Return selector component
+	  selectizeInput(
+		  "quanti_sup",
+		  "Colonnes quantitative suplémentaires :",
+		  choices = colnames(dat),
+		  multiple = TRUE,
+		  selected = selected
+		)
+  })
+  
+  # Select columns quanli sup
+  output$quali_sup <- renderUI({
+    selected <- c()
+    dat <- table()
+    for(colname in colnames(dat)) {
+      # Remove useless column by default (better alternative ?)
+      if (colname == 'Competition') {
+        selected <- append(selected, colname)
+      }
+    }
+  
+    # Return selector component
+	  selectizeInput(
+		  "quali_sup",
+		  "Colonnes qualitative suplémentaires :",
 		  choices = colnames(dat),
 		  multiple = TRUE,
 		  selected = selected
